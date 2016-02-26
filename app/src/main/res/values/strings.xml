@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Addict</string>
+
+    <string name="tab_menu1">DAILY</string>
+    <string name="tab_menu2">MONTHLY</string>
+    <string name="tab_menu3">ALL TIME</string>
+</resources>
