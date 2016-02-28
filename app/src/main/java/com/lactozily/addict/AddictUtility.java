@@ -3,6 +3,7 @@ package com.lactozily.addict;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.Build;
 
@@ -26,5 +27,14 @@ public class AddictUtility {
             }
         }
         return false;
+    }
+
+    public static boolean isScreenLocked(Context context) {
+        KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        if( myKM.inKeyguardRestrictedInputMode()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

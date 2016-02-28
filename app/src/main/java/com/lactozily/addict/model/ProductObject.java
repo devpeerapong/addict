@@ -12,6 +12,9 @@ public class ProductObject extends RealmObject {
     private String packageName;
     private String productName;
     private RealmList<ProductHistory> histories;
+    private int counterDaily;
+    private int counterMonthly;
+    private int counterAllTime;
 
     public String getPackageName() {
         return packageName;
@@ -35,5 +38,29 @@ public class ProductObject extends RealmObject {
 
     public void setHistories(RealmList<ProductHistory> histories) {
         this.histories = histories;
+    }
+
+    public int getCounterAllTime() {
+        return counterAllTime;
+    }
+
+    public void setCounterAllTime(int counterAllTime) {
+        this.counterAllTime = counterAllTime;
+    }
+
+    public int getCounterMonthly() {
+        return counterMonthly;
+    }
+
+    public void setCounterMonthly(int counterMonthly) {
+        this.counterMonthly = counterMonthly;
+    }
+
+    public int getCounterDaily() {
+        return counterDaily;
+    }
+
+    public void setCounterDaily(int counterDaily) {
+        this.counterDaily = counterDaily;
     }
 }

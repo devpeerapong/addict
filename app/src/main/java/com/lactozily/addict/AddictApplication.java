@@ -58,12 +58,17 @@ public class AddictApplication extends Application {
             tw.setProductName("Twitter");
             tw.setPackageName("com.twitter.android");
 
+            ProductObject bw = new ProductObject();
+            bw.setProductName("Browser");
+            bw.setPackageName("com.android.browser");
+
             realm.beginTransaction();
             realm.copyToRealm(fb);
             realm.copyToRealm(li);
             realm.copyToRealm(ig);
             realm.copyToRealm(sn);
             realm.copyToRealm(tw);
+            realm.copyToRealm(bw);
             realm.commitTransaction();
         }
     }

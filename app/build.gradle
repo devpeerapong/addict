@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'io.realm:realm-android:0.87.5'
     compile 'com.evernote:android-job:1.0.2'
+    compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
 }
