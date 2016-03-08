@@ -50,7 +50,7 @@
         android:layout_height="match_parent"
         android:text="100"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="20dp"
         android:gravity="center_vertical"
         android:textSize="16sp"
         android:id="@+id/product_counter_txt"/>

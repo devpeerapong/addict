@@ -1,9 +1,12 @@
 package com.lactozily.addict;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.lactozily.addict.model.ProductHistory;
@@ -69,6 +72,8 @@ public class AddictMonitorService extends IntentService {
                     ProductHistory history = new ProductHistory();
                     history.setTime(Calendar.getInstance().getTime());
                     productObject.getHistories().add(history);
+                    realm.commitTransaction();
+
 
                     Calendar cToday = Calendar.getInstance();
                     cToday.set(Calendar.HOUR_OF_DAY, 0);
@@ -79,9 +84,8 @@ public class AddictMonitorService extends IntentService {
                     cTmr.set(Calendar.HOUR_OF_DAY, 23);
                     cTmr.set(Calendar.MINUTE, 59);
                     cTmr.set(Calendar.SECOND, 59);
-                    productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime());
-                    realm.commitTransaction();
-
+                    int counter = productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime()).findAll().size();
+                    checkUsage(counter, productObject.getProductName());
                     PREVIOUS_APP = CURRENT_APP;
 
                 } catch (InterruptedException e) {
@@ -114,5 +118,49 @@ public class AddictMonitorService extends IntentService {
         public int compare(UsageStats lhs, UsageStats rhs) {
             return (lhs.getLastTimeUsed() > rhs.getLastTimeUsed()) ? -1 : (lhs.getLastTimeUsed() == rhs.getLastTimeUsed()) ? 0 : 1;
         }
+    }
+
+    private void checkUsage(int counter, String name) {
+        String text = name + " " + String.valueOf(counter) + " time today.";
+        switch (counter) {
+            case 20:
+                notifyUsage(counter, name, "Be careful!", text);
+                break;
+            case 50:
+                notifyUsage(counter, name, "Please, go get a life!", text);
+                break;
+            case 80:
+                notifyUsage(counter, name, "You should stop now!", text);
+                break;
+            case 100:
+                notifyUsage(counter, name, "RIP Real Life, GG EZ", text);
+                break;
+            default:
+                return;
+        }
+    }
+
+    //TODO: move this to NotificationService class or something like that.
+    private void notifyUsage(int counter, String name, String title, String text) {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text);
+
+        int mNotificationId = 001;
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());
     }
 }

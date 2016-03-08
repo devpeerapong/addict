@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         private static final String[] TAB_NAME = {"DAILY", "MONTHLY", "ALL TIME"};
         private static final String TAB_POSITION = "tab_position";
         Realm realm;
+        RealmResults<ProductObject> query;
 
         public AddictFragment() {
         }
@@ -126,22 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
             realm = Realm.getDefaultInstance();
 
-            RealmResults<ProductObject> query = realm.where(ProductObject.class).findAll();
+            query = realm.where(ProductObject.class).findAll();
 
-            switch (tabPosition) {
-                case 0:
-                    setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition));
-                    break;
-                case 1:
-                    setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition));
-                    break;
-                case 2:
-                    setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition));
-                    break;
-                default:
-                    setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition));
-            }
-
+            setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition, realm));
         }
 
         @Nullable
@@ -151,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
             int tabPosition = args.getInt(TAB_POSITION);
 
             realm = Realm.getDefaultInstance();
+            Log.i(TAG, "onCreateView " + String.valueOf(tabPosition));
 
             View rootView = inflater.inflate(R.layout.addict_stats, container, false);
             TextView date_txt = (TextView)rootView.findViewById(R.id.date_txt);
@@ -184,10 +173,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public void onResume() {
+            super.onResume();
+            Bundle args = getArguments();
+            int tabPosition = args.getInt(TAB_POSITION);
+
+            realm = Realm.getDefaultInstance();
+
+            query = realm.where(ProductObject.class).findAll();
+
+            setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition, realm));
+        }
+
+        @Override
         public void onPause() {
             super.onPause();
 
             realm.close();
+            realm.removeAllChangeListeners();
         }
     }
 }

@@ -59,6 +59,10 @@ public class AddictApplication extends Application {
             tw.setPackageName("com.twitter.android");
 
             ProductObject bw = new ProductObject();
+            bw.setProductName("Chrome");
+            bw.setPackageName("com.android.browser");
+
+            ProductObject ch = new ProductObject();
             bw.setProductName("Browser");
             bw.setPackageName("com.android.browser");
 
