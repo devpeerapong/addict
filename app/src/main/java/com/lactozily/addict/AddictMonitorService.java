@@ -143,7 +143,7 @@ public class AddictMonitorService extends IntentService {
     //TODO: move this to NotificationService class or something like that.
     private void notifyUsage(int counter, String name, String title, String text) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_noti)
                 .setContentTitle(title)
                 .setContentText(text);
 

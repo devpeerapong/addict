@@ -24,6 +24,7 @@ import com.lactozily.addict.model.ProductObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.NoSuchElementException;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -41,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
+        try {
+            assert actionBar != null;
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
 
         AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
