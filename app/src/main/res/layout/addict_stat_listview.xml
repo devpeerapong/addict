@@ -45,6 +45,7 @@
                 android:id="@+id/product_time_txt"
                 android:layout_marginBottom="2dp" />
         </LinearLayout>
+
     </LinearLayout>
     <TextView
         android:layout_width="wrap_content"
