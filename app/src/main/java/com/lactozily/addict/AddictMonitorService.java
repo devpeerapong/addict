@@ -68,23 +68,22 @@ public class AddictMonitorService extends IntentService {
 
                     ProductObject productObject = query.where().equalTo("packageName", CURRENT_APP).findFirst();
 
+                    Calendar cToday = AddictUtility.getStartTimeOfDate();
+                    Calendar cTmr = AddictUtility.getEndTimeOfDate();
+                    Calendar firstDateOfMonth = AddictUtility.getStartTimeOfMonth();
+                    Calendar lastDateOfMonth = AddictUtility.getEndTimeOfMonth();
+
                     realm.beginTransaction();
                     ProductHistory history = new ProductHistory();
                     history.setTime(Calendar.getInstance().getTime());
                     productObject.getHistories().add(history);
+                    productObject.setCounterAllTime(productObject.getHistories().size());
+                    int counter = productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime()).findAll().size();
+                    int mCounter = productObject.getHistories().where().between("time", firstDateOfMonth.getTime(), lastDateOfMonth.getTime()).findAll().size();
+                    productObject.setCounterDaily(counter);
+                    productObject.setCounterMonthly(mCounter);
                     realm.commitTransaction();
 
-
-                    Calendar cToday = Calendar.getInstance();
-                    cToday.set(Calendar.HOUR_OF_DAY, 0);
-                    cToday.set(Calendar.MINUTE, 0);
-                    cToday.set(Calendar.SECOND, 0);
-
-                    Calendar cTmr = Calendar.getInstance();
-                    cTmr.set(Calendar.HOUR_OF_DAY, 23);
-                    cTmr.set(Calendar.MINUTE, 59);
-                    cTmr.set(Calendar.SECOND, 59);
-                    int counter = productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime()).findAll().size();
                     checkUsage(counter, productObject.getProductName());
                     PREVIOUS_APP = CURRENT_APP;
 

@@ -20,12 +20,14 @@ import android.widget.TextView;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
+import com.lactozily.addict.model.ProductHistory;
 import com.lactozily.addict.model.ProductObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.NoSuchElementException;
 
+import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -33,11 +35,16 @@ import io.realm.Sort;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     JobManager mJobManager;
+    static Realm realm;
+    static RealmResults<ProductObject> query;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        realm = Realm.getDefaultInstance();
+        query = realm.where(ProductObject.class).findAll();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -52,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
 
         AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
+        assert viewPager != null;
         viewPager.setAdapter(addictPagerAdapter);
         TabLayout tabLayout = (TabLayout)findViewById(R.id.tab);
+        assert tabLayout != null;
         tabLayout.setupWithViewPager(viewPager);
 
         mJobManager = JobManager.instance();
@@ -108,11 +117,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static class AddictFragment extends ListFragment {
+    public static class AddictFragment extends Fragment {
         private static final String[] TAB_NAME = {"DAILY", "MONTHLY", "ALL TIME"};
         private static final String TAB_POSITION = "tab_position";
-        Realm realm;
-        RealmResults<ProductObject> query;
+        private RealmRecyclerView realmRecyclerView;
+        private AddictRecycleViewAdapter addictRecycleViewAdapter;
+
 
         public AddictFragment() {
         }
@@ -128,15 +138,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
-            Bundle args = getArguments();
-            int tabPosition = args.getInt(TAB_POSITION);
-
-            realm = Realm.getDefaultInstance();
-
-            query = realm.where(ProductObject.class).findAll();
-
-            setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition, realm));
         }
 
         @Nullable
@@ -146,12 +147,15 @@ public class MainActivity extends AppCompatActivity {
             int tabPosition = args.getInt(TAB_POSITION);
 
             realm = Realm.getDefaultInstance();
-            Log.i(TAG, "onCreateView " + String.valueOf(tabPosition));
 
             View rootView = inflater.inflate(R.layout.addict_stats, container, false);
+            realmRecyclerView = (RealmRecyclerView)rootView.findViewById(R.id.addict_stats_recycle_view);
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            realmRecyclerView.setAdapter(addictRecycleViewAdapter);
+
             TextView date_txt = (TextView)rootView.findViewById(R.id.date_txt);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
             String dt = "";
 
             switch (tabPosition) {
@@ -176,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            getListView().setDivider(null);
         }
 
         @Override
@@ -184,20 +187,19 @@ public class MainActivity extends AppCompatActivity {
             super.onResume();
             Bundle args = getArguments();
             int tabPosition = args.getInt(TAB_POSITION);
-
-            realm = Realm.getDefaultInstance();
-
-            query = realm.where(ProductObject.class).findAll();
-
-            setListAdapter(new AddictStatsAdapter(this.getContext(), query, true, tabPosition, realm));
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            realmRecyclerView.setAdapter(addictRecycleViewAdapter);
         }
 
         @Override
         public void onPause() {
             super.onPause();
+        }
 
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
             realm.close();
-            realm.removeAllChangeListeners();
         }
     }
 }

@@ -7,6 +7,8 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.Build;
 
+import java.util.Calendar;
+
 /**
  * Created by lactozily on 2/27/2016 AD.
  */
@@ -36,5 +38,41 @@ public class AddictUtility {
         } else {
             return false;
         }
+    }
+
+    public static Calendar getStartTimeOfDate() {
+        Calendar cToday = Calendar.getInstance();
+        cToday.set(Calendar.HOUR_OF_DAY, 0);
+        cToday.set(Calendar.MINUTE, 0);
+        cToday.set(Calendar.SECOND, 0);
+        return cToday;
+    }
+
+    public static Calendar getEndTimeOfDate() {
+        Calendar cTmr = Calendar.getInstance();
+        cTmr.set(Calendar.HOUR_OF_DAY, 23);
+        cTmr.set(Calendar.MINUTE, 59);
+        cTmr.set(Calendar.SECOND, 59);
+        return cTmr;
+    }
+
+    public static Calendar getStartTimeOfMonth() {
+        Calendar cFirstDate = Calendar.getInstance();
+        cFirstDate.set(Calendar.DAY_OF_MONTH, 1);
+        cFirstDate.set(Calendar.HOUR_OF_DAY, 0);
+        cFirstDate.set(Calendar.MINUTE, 0);
+        cFirstDate.set(Calendar.SECOND, 0);
+
+        return cFirstDate;
+    }
+
+    public static Calendar getEndTimeOfMonth() {
+        Calendar cLastDate = Calendar.getInstance();
+        cLastDate.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH));
+        cLastDate.set(Calendar.HOUR_OF_DAY, 23);
+        cLastDate.set(Calendar.MINUTE, 59);
+        cLastDate.set(Calendar.SECOND, 59);
+
+        return cLastDate;
     }
 }
