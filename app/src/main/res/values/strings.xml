@@ -4,4 +4,5 @@
     <string name="tab_menu1">DAILY</string>
     <string name="tab_menu2">MONTHLY</string>
     <string name="tab_menu3">ALL TIME</string>
+    <string name="add_btn">Add Button</string>
 </resources>
