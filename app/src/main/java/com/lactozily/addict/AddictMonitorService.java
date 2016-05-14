@@ -28,6 +28,7 @@ public class AddictMonitorService extends IntentService {
     public static final String NONE_PKG = "NONE_PKG";
     public static String CURRENT_APP;
     public static String PREVIOUS_APP;
+    public static boolean updateQueryNeed = false;
     Realm realm;
     RealmResults<ProductObject> query;
 
@@ -43,11 +44,19 @@ public class AddictMonitorService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         realm = Realm.getDefaultInstance();
-        query = realm.where(ProductObject.class).findAll();
+        query = realm.allObjects(ProductObject.class);
         synchronized (this) {
             while (true) {
                 try {
                     wait(700);
+
+                    if(updateQueryNeed) {
+                        updateQueryNeed = false;
+                        Log.i("Query", "UpdateQuery");
+                        Log.i("Query", query.toString());
+                        break;
+                    }
+
                     Log.i(TAG, "Monitoring");
 
                     if (AddictUtility.isScreenLocked(this)) {

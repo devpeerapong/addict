@@ -6,6 +6,7 @@ import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import java.util.Calendar;
 
@@ -13,7 +14,8 @@ import java.util.Calendar;
  * Created by lactozily on 2/27/2016 AD.
  */
 public class AddictUtility {
-    public static int ADD_PRODUCT_REQUEST_CODE = 0;
+    public static final int ADD_PRODUCT_REQUEST_CODE = 522;
+    public static final int REMOVE_PRODUCT_REQUEST_CODE = 10;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static boolean usageAccessGranted(Context context) {
@@ -48,6 +50,13 @@ public class AddictUtility {
         cToday.set(Calendar.MINUTE, 0);
         cToday.set(Calendar.SECOND, 0);
         return cToday;
+    }
+
+    public static Calendar getTimeInLastWeek(int date) {
+        Long lastWeekTimestamp = getStartTimeOfDate().getTimeInMillis() - (86400000 * date);
+        Calendar cLastWeek = Calendar.getInstance();
+        cLastWeek.setTimeInMillis(lastWeekTimestamp);
+        return cLastWeek;
     }
 
     public static Calendar getEndTimeOfDate() {
