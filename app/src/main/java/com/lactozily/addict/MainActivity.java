@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_add:
                 Intent intent = new Intent(this, SearchableActivity.class);
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
