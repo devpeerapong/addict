@@ -1,12 +1,12 @@
 package com.lactozily.addict;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,26 +14,28 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
-import com.lactozily.addict.model.ProductHistory;
 import com.lactozily.addict.model.ProductObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.NoSuchElementException;
 
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
+    static Context mContext;
     JobManager mJobManager;
     static Realm realm;
     static RealmResults<ProductObject> query;
@@ -42,10 +44,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         realm = Realm.getDefaultInstance();
         query = realm.where(ProductObject.class).findAll();
+        mContext = this;
 
+        initializeToolbar();
+        initializeFragment();
+
+        mJobManager = JobManager.instance();
+
+        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
+            Intent intent = new Intent(this, AddictMonitorService.class);
+            startService(intent);
+        }
+    }
+
+    private void initializeFragment() {
+        AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
+        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
+        assert viewPager != null;
+        viewPager.setAdapter(addictPagerAdapter);
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.tab);
+        assert tabLayout != null;
+        tabLayout.setupWithViewPager(viewPager);
+    }
+
+    private void initializeToolbar() {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -55,27 +79,25 @@ public class MainActivity extends AppCompatActivity {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
 
 
-        AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
-        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
-        assert viewPager != null;
-        viewPager.setAdapter(addictPagerAdapter);
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.tab);
-        assert tabLayout != null;
-        tabLayout.setupWithViewPager(viewPager);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
 
-        mJobManager = JobManager.instance();
-
-        Log.i(TAG, "Create Activity");
-
-        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
-            Intent intent = new Intent(this, AddictMonitorService.class);
-            startService(intent);
-            Log.i(TAG, "Service not running");
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                Intent intent = new Intent(this, SearchableActivity.class);
+                startActivityForResult(intent, AddictUtility.ADD_PRODUCT_REQUEST_CODE);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        Log.i(TAG, "Service running");
     }
 
     @Override
@@ -87,12 +109,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
+        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
+            Intent intent = new Intent(this, AddictMonitorService.class);
+            startService(intent);
+        }
         new JobRequest.Builder(AddictServiceChecker.TAG)
                 .setPeriodic(60_000L)
                 .setPersisted(true)
                 .build()
                 .schedule();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+
+        Log.i("Result", String.valueOf(requestCode));
+        Log.i("Result", String.valueOf(resultCode));
+        Log.i("Result", data.toString());
+
+        if (requestCode == AddictUtility.ADD_PRODUCT_REQUEST_CODE) {
+            Toast.makeText(this, "Add " + data.getStringExtra("product_name") + " Complete", Toast.LENGTH_SHORT).show();
+        } else if (requestCode == AddictUtility.REMOVE_PRODUCT_REQUEST_CODE) {
+            Toast.makeText(this, "Remove " + data.getStringExtra("product_name") + " Complete", Toast.LENGTH_SHORT).show();
+        }
     }
 
     static class AddictPagerAdapter extends FragmentStatePagerAdapter {
@@ -123,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         private RealmRecyclerView realmRecyclerView;
         private AddictRecycleViewAdapter addictRecycleViewAdapter;
 
-
         public AddictFragment() {
         }
 
@@ -150,7 +191,17 @@ public class MainActivity extends AppCompatActivity {
 
             View rootView = inflater.inflate(R.layout.addict_stats, container, false);
             realmRecyclerView = (RealmRecyclerView)rootView.findViewById(R.id.addict_stats_recycle_view);
-            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition, new AddictRecycleViewAdapter.OnClickListener() {
+                @Override
+                public void OnItemClick(int position) {
+                    Intent intent = new Intent(mContext, ProductDetail.class);
+                    String packageName = query.get(position).getPackageName();
+                    String productName = query.get(position).getProductName();
+                    intent.putExtra("package_name", packageName);
+                    intent.putExtra("product_name", productName);
+                    getActivity().startActivityForResult(intent, AddictUtility.REMOVE_PRODUCT_REQUEST_CODE);
+                }
+            });
             realmRecyclerView.setAdapter(addictRecycleViewAdapter);
 
             TextView date_txt = (TextView)rootView.findViewById(R.id.date_txt);
@@ -187,7 +238,19 @@ public class MainActivity extends AppCompatActivity {
             super.onResume();
             Bundle args = getArguments();
             int tabPosition = args.getInt(TAB_POSITION);
-            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition, new AddictRecycleViewAdapter.OnClickListener() {
+                @Override
+                public void OnItemClick(int position) {
+                    Log.i("TEST", "WHAT");
+                    Intent intent = new Intent(mContext, ProductDetail.class);
+                    String packageName = query.get(position).getPackageName();
+                    String productName = query.get(position).getProductName();
+                    intent.putExtra("package_name", packageName);
+                    intent.putExtra("product_name", productName);
+
+                    getActivity().startActivityForResult(intent, AddictUtility.REMOVE_PRODUCT_REQUEST_CODE);
+                }
+            });
             realmRecyclerView.setAdapter(addictRecycleViewAdapter);
         }
 

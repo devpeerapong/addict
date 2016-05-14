@@ -6,8 +6,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground">
         <ImageView
+            android:transitionName="product_detail"
             android:contentDescription="Product Icon"
             android:layout_marginStart="16dp"
             android:layout_width="36dp"

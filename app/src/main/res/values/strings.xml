@@ -4,4 +4,9 @@
     <string name="tab_menu1">DAILY</string>
     <string name="tab_menu2">MONTHLY</string>
     <string name="tab_menu3">ALL TIME</string>
+    <string name="add_btn">Add Button</string>
+    <string name="search_application">Search Application</string>
+    <string name="add_product_request_code">Add Product</string>
+    <string name="product_detail_menu">Product Detail Menu</string>
+    <string name="remove_product_menu">Remove</string>
 </resources>
