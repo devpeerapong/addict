@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <TextView
@@ -11,8 +12,10 @@
         android:id="@+id/date_txt"
         android:layout_marginStart="16dp"
         android:gravity="center"/>
-    <ListView
+    <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
+        android:id="@+id/addict_stats_recycle_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@android:id/list"/>
+        app:rrvIsRefreshable="false"
+        app:rrvLayoutType="LinearLayout" />
 </LinearLayout>

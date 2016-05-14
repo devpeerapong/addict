@@ -28,6 +28,7 @@ public class AddictMonitorService extends IntentService {
     public static final String NONE_PKG = "NONE_PKG";
     public static String CURRENT_APP;
     public static String PREVIOUS_APP;
+    public static boolean updateQueryNeed = false;
     Realm realm;
     RealmResults<ProductObject> query;
 
@@ -43,11 +44,19 @@ public class AddictMonitorService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         realm = Realm.getDefaultInstance();
-        query = realm.where(ProductObject.class).findAll();
+        query = realm.allObjects(ProductObject.class);
         synchronized (this) {
             while (true) {
                 try {
                     wait(700);
+
+                    if(updateQueryNeed) {
+                        updateQueryNeed = false;
+                        Log.i("Query", "UpdateQuery");
+                        Log.i("Query", query.toString());
+                        break;
+                    }
+
                     Log.i(TAG, "Monitoring");
 
                     if (AddictUtility.isScreenLocked(this)) {
@@ -68,23 +77,22 @@ public class AddictMonitorService extends IntentService {
 
                     ProductObject productObject = query.where().equalTo("packageName", CURRENT_APP).findFirst();
 
+                    Calendar cToday = AddictUtility.getStartTimeOfDate();
+                    Calendar cTmr = AddictUtility.getEndTimeOfDate();
+                    Calendar firstDateOfMonth = AddictUtility.getStartTimeOfMonth();
+                    Calendar lastDateOfMonth = AddictUtility.getEndTimeOfMonth();
+
                     realm.beginTransaction();
                     ProductHistory history = new ProductHistory();
                     history.setTime(Calendar.getInstance().getTime());
                     productObject.getHistories().add(history);
+                    productObject.setCounterAllTime(productObject.getHistories().size());
+                    int counter = productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime()).findAll().size();
+                    int mCounter = productObject.getHistories().where().between("time", firstDateOfMonth.getTime(), lastDateOfMonth.getTime()).findAll().size();
+                    productObject.setCounterDaily(counter);
+                    productObject.setCounterMonthly(mCounter);
                     realm.commitTransaction();
 
-
-                    Calendar cToday = Calendar.getInstance();
-                    cToday.set(Calendar.HOUR_OF_DAY, 0);
-                    cToday.set(Calendar.MINUTE, 0);
-                    cToday.set(Calendar.SECOND, 0);
-
-                    Calendar cTmr = Calendar.getInstance();
-                    cTmr.set(Calendar.HOUR_OF_DAY, 23);
-                    cTmr.set(Calendar.MINUTE, 59);
-                    cTmr.set(Calendar.SECOND, 59);
-                    int counter = productObject.getHistories().where().between("time", cToday.getTime(), cTmr.getTime()).findAll().size();
                     checkUsage(counter, productObject.getProductName());
                     PREVIOUS_APP = CURRENT_APP;
 

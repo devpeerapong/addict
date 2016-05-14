@@ -118,6 +118,10 @@ public class AddictStatsAdapter extends RealmBaseAdapter<ProductObject> implemen
         return convertView;
     }
 
+    public interface AsyncResponse {
+        void processFinish(Drawable output);
+    }
+
     private class PackageIconTask extends AsyncTask<String, String, Drawable> {
         public AsyncResponse delegate = null;
 
@@ -145,9 +149,5 @@ public class AddictStatsAdapter extends RealmBaseAdapter<ProductObject> implemen
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
-    }
-
-    public interface AsyncResponse {
-        void processFinish(Drawable output);
     }
 }
