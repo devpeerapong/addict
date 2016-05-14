@@ -156,6 +156,10 @@ public class SearchableActivity extends AppCompatActivity {
             installedApplications = result;
             Collections.sort(installedApplications, new ApplicationInfo.DisplayNameComparator(mPackageManager));
             for (ApplicationInfo appInfo : installedApplications) {
+                long size = realm.where(ProductObject.class).equalTo("packageName", appInfo.packageName).count();
+                if(size != 0) {
+                    continue;
+                }
                 mApplicationInfo.add(new AddictApplicationInfo(appInfo.loadLabel(mPackageManager).toString(), appInfo.packageName));
             }
             progressBar.setVisibility(View.INVISIBLE);
