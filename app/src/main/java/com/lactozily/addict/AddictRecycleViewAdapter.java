@@ -26,22 +26,35 @@ import io.realm.RealmViewHolder;
 public class AddictRecycleViewAdapter extends RealmBasedRecyclerViewAdapter<ProductObject, AddictRecycleViewAdapter.ViewHolder> {
     int mTabPosition;
     protected PackageManager mPackageManager;
+    OnClickListener mListener;
+
+    public interface OnClickListener {
+        void OnItemClick(int position);
+    }
 
     public AddictRecycleViewAdapter(
             Context context,
             RealmResults<ProductObject> realmResults,
             boolean automaticUpdate,
             boolean animateIdType,
-            int tabPosition) {
+            int tabPosition,
+            OnClickListener listener) {
         super(context, realmResults, automaticUpdate, animateIdType);
         mTabPosition = tabPosition;
         mPackageManager = context.getPackageManager();
+        mListener = listener;
     }
 
     @Override
     public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int i) {
         View v = inflater.inflate(R.layout.addict_stat_listview, viewGroup, false);
-        ViewHolder vh = new ViewHolder((LinearLayout) v);
+        final ViewHolder vh = new ViewHolder((LinearLayout) v);
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.OnItemClick(vh.getLayoutPosition());
+            }
+        });
         return vh;
     }
 

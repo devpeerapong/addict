@@ -54,7 +54,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         String packageName = mVisibleSearchResult.get(position).getPackageName();
         String productName = mVisibleSearchResult.get(position).getProductName();
         holder.bind(packageName, productName);
-
     }
 
     @Override

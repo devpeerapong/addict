@@ -163,17 +163,17 @@ public class SearchableActivity extends AppCompatActivity {
                 @Override
                 public void OnItemClick(int position) {
                     AddictApplicationInfo selectedApp = searchResultAdapter.mVisibleSearchResult.get(position);
-//                    ProductObject product = new ProductObject();
-//                    product.setProductName(selectedApp.getProductName());
-//                    product.setPackageName(selectedApp.getPackageName());
-//                    product.setCounterDaily(0);
-//                    product.setCounterMonthly(0);
-//                    product.setCounterAllTime(0);
-//
-//                    realm.beginTransaction();
-//                    realm.copyToRealm(product);
-//                    realm.commitTransaction();
-                    Log.i("OnItemClick", "WHAT");
+                    ProductObject product = new ProductObject();
+                    product.setProductName(selectedApp.getProductName());
+                    product.setPackageName(selectedApp.getPackageName());
+                    product.setCounterDaily(0);
+                    product.setCounterMonthly(0);
+                    product.setCounterAllTime(0);
+
+                    realm.beginTransaction();
+                    realm.copyToRealm(product);
+                    realm.commitTransaction();
+                    AddictMonitorService.updateQueryNeed = true;
                     Intent intent = new Intent();
                     intent.putExtra("product_name", selectedApp.getProductName());
                     SearchableActivity.this.setResult(Activity.RESULT_OK, intent);

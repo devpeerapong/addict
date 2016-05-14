@@ -1,5 +1,6 @@
 package com.lactozily.addict;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -34,6 +35,7 @@ import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
+    static Context mContext;
     JobManager mJobManager;
     static Realm realm;
     static RealmResults<ProductObject> query;
@@ -42,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         realm = Realm.getDefaultInstance();
         query = realm.where(ProductObject.class).findAll();
+        mContext = this;
 
         initializeToolbar();
         initializeFragment();
@@ -107,6 +109,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
+            Intent intent = new Intent(this, AddictMonitorService.class);
+            startService(intent);
+        }
         new JobRequest.Builder(AddictServiceChecker.TAG)
                 .setPeriodic(60_000L)
                 .setPersisted(true)
@@ -116,8 +122,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AddictUtility.ADD_PRODUCT_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+
+        Log.i("Result", String.valueOf(requestCode));
+        Log.i("Result", String.valueOf(resultCode));
+        Log.i("Result", data.toString());
+
+        if (requestCode == AddictUtility.ADD_PRODUCT_REQUEST_CODE) {
             Toast.makeText(this, "Add " + data.getStringExtra("product_name") + " Complete", Toast.LENGTH_SHORT).show();
+        } else if (requestCode == AddictUtility.REMOVE_PRODUCT_REQUEST_CODE) {
+            Toast.makeText(this, "Remove " + data.getStringExtra("product_name") + " Complete", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -149,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         private RealmRecyclerView realmRecyclerView;
         private AddictRecycleViewAdapter addictRecycleViewAdapter;
 
-
         public AddictFragment() {
         }
 
@@ -176,7 +191,17 @@ public class MainActivity extends AppCompatActivity {
 
             View rootView = inflater.inflate(R.layout.addict_stats, container, false);
             realmRecyclerView = (RealmRecyclerView)rootView.findViewById(R.id.addict_stats_recycle_view);
-            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition, new AddictRecycleViewAdapter.OnClickListener() {
+                @Override
+                public void OnItemClick(int position) {
+                    Intent intent = new Intent(mContext, ProductDetail.class);
+                    String packageName = query.get(position).getPackageName();
+                    String productName = query.get(position).getProductName();
+                    intent.putExtra("package_name", packageName);
+                    intent.putExtra("product_name", productName);
+                    getActivity().startActivityForResult(intent, AddictUtility.REMOVE_PRODUCT_REQUEST_CODE);
+                }
+            });
             realmRecyclerView.setAdapter(addictRecycleViewAdapter);
 
             TextView date_txt = (TextView)rootView.findViewById(R.id.date_txt);
@@ -213,7 +238,19 @@ public class MainActivity extends AppCompatActivity {
             super.onResume();
             Bundle args = getArguments();
             int tabPosition = args.getInt(TAB_POSITION);
-            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition);
+            addictRecycleViewAdapter = new AddictRecycleViewAdapter(getContext(), query, false, true, tabPosition, new AddictRecycleViewAdapter.OnClickListener() {
+                @Override
+                public void OnItemClick(int position) {
+                    Log.i("TEST", "WHAT");
+                    Intent intent = new Intent(mContext, ProductDetail.class);
+                    String packageName = query.get(position).getPackageName();
+                    String productName = query.get(position).getProductName();
+                    intent.putExtra("package_name", packageName);
+                    intent.putExtra("product_name", productName);
+
+                    getActivity().startActivityForResult(intent, AddictUtility.REMOVE_PRODUCT_REQUEST_CODE);
+                }
+            });
             realmRecyclerView.setAdapter(addictRecycleViewAdapter);
         }
 
