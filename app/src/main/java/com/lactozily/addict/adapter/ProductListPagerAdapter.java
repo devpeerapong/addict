@@ -1,9 +1,10 @@
-package com.lactozily.addict;
+package com.lactozily.addict.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import com.lactozily.addict.ProductListFragment;
 import com.lactozily.addict.model.ProductObject;
 
 import java.text.SimpleDateFormat;
@@ -16,7 +17,7 @@ import io.realm.RealmResults;
 /**
  * Created by lactozily on 5/15/2016 AD.
  */
-class ProductListPagerAdapter extends FragmentStatePagerAdapter {
+public class ProductListPagerAdapter extends FragmentStatePagerAdapter {
     private static Realm realm;
     private static RealmResults<ProductObject> query;
     private static final String[] TAB_NAME = {"DAILY", "MONTHLY", "ALL TIME"};

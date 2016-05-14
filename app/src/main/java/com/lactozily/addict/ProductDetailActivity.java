@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.lactozily.addict.adapter.ProductWeekHistoryAdapter;
 import com.lactozily.addict.model.ProductObject;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.List;
 
 import io.realm.Realm;
 
-public class ProductDetail extends AppCompatActivity {
+public class ProductDetailActivity extends AppCompatActivity {
 
     private static Realm realm;
 

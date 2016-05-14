@@ -13,7 +13,7 @@ import java.util.Calendar;
 /**
  * Created by lactozily on 2/27/2016 AD.
  */
-class AddictUtility {
+public class AddictUtility {
     public static final int ADD_PRODUCT_REQUEST_CODE = 522;
     public static final int REMOVE_PRODUCT_REQUEST_CODE = 10;
 

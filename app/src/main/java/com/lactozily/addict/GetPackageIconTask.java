@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 /**
  * Created by lactozily on 5/15/2016 AD.
  */
-class GetPackageIconTask extends AsyncTask<String, String, Drawable> {
+public class GetPackageIconTask extends AsyncTask<String, String, Drawable> {
     private AddictUtility.AsyncResponse delegate = null;
     private final PackageManager mPackageManager;
 

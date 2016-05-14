@@ -1,4 +1,4 @@
-package com.lactozily.addict;
+package com.lactozily.addict.adapter;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -10,13 +10,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.lactozily.addict.AddictUtility;
+import com.lactozily.addict.GetPackageIconTask;
+import com.lactozily.addict.R;
+import com.lactozily.addict.model.AddictApplicationInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by lactozily on 5/10/2016 AD.
  */
-public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
+public class AddProductRecyclerViewAdapter extends RecyclerView.Adapter<AddProductRecyclerViewAdapter.ViewHolder> {
 
     private final List<AddictApplicationInfo> mSearchResults;
     private static PackageManager mPackageManager;
@@ -27,7 +32,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         void OnItemClick(int position);
     }
 
-    public SearchResultAdapter(List<AddictApplicationInfo> SearchResults, PackageManager packageManager, OnClickListener listener) {
+    public AddProductRecyclerViewAdapter(List<AddictApplicationInfo> SearchResults, PackageManager packageManager, OnClickListener listener) {
         mSearchResults = SearchResults;
         mPackageManager = packageManager;
         mVisibleSearchResult = new ArrayList<>();

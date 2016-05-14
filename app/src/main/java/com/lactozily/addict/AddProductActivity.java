@@ -23,6 +23,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.lactozily.addict.adapter.AddProductRecyclerViewAdapter;
+import com.lactozily.addict.model.AddictApplicationInfo;
 import com.lactozily.addict.model.ProductObject;
 
 import java.util.ArrayList;
@@ -32,14 +34,14 @@ import java.util.Objects;
 
 import io.realm.Realm;
 
-public class SearchableActivity extends AppCompatActivity {
+public class AddProductActivity extends AppCompatActivity {
     private PackageManager mPackageManager;
     private List<ApplicationInfo> installedApplications;
     private List<AddictApplicationInfo> mApplicationInfo;
 
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
-    private SearchResultAdapter searchResultAdapter;
+    private AddProductRecyclerViewAdapter addProductRecyclerViewAdapter;
     private Realm realm;
 
 
@@ -106,10 +108,10 @@ public class SearchableActivity extends AppCompatActivity {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(new SearchResultAdapter(mApplicationInfo, mPackageManager, new SearchResultAdapter.OnClickListener() {
+        recyclerView.setAdapter(new AddProductRecyclerViewAdapter(mApplicationInfo, mPackageManager, new AddProductRecyclerViewAdapter.OnClickListener() {
             @Override
             public void OnItemClick(int position) {
-                Log.i("ClickItem", searchResultAdapter.mVisibleSearchResult.get(position).getPackageName());
+                Log.i("ClickItem", addProductRecyclerViewAdapter.mVisibleSearchResult.get(position).getPackageName());
             }
         }));
     }
@@ -127,19 +129,19 @@ public class SearchableActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                SearchableActivity.this.setResult(Activity.RESULT_CANCELED);
-                SearchableActivity.this.finish();
+                AddProductActivity.this.setResult(Activity.RESULT_CANCELED);
+                AddProductActivity.this.finish();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (Objects.equals(newText, "")) {
-                    ((SearchResultAdapter) recyclerView.getAdapter()).flushFilter();
+                    ((AddProductRecyclerViewAdapter) recyclerView.getAdapter()).flushFilter();
                     return true;
                 }
 
-                ((SearchResultAdapter) recyclerView.getAdapter()).setFilter(newText);
+                ((AddProductRecyclerViewAdapter) recyclerView.getAdapter()).setFilter(newText);
                 return true;
             }
         });
@@ -157,16 +159,16 @@ public class SearchableActivity extends AppCompatActivity {
             Collections.sort(installedApplications, new ApplicationInfo.DisplayNameComparator(mPackageManager));
             for (ApplicationInfo appInfo : installedApplications) {
                 long size = realm.where(ProductObject.class).equalTo("packageName", appInfo.packageName).count();
-                if(size != 0) {
+                if(size != 0 || isSystemPackage(appInfo)) {
                     continue;
                 }
                 mApplicationInfo.add(new AddictApplicationInfo(appInfo.loadLabel(mPackageManager).toString(), appInfo.packageName));
             }
             progressBar.setVisibility(View.INVISIBLE);
-            searchResultAdapter = new SearchResultAdapter(mApplicationInfo, mPackageManager, new SearchResultAdapter.OnClickListener() {
+            addProductRecyclerViewAdapter = new AddProductRecyclerViewAdapter(mApplicationInfo, mPackageManager, new AddProductRecyclerViewAdapter.OnClickListener() {
                 @Override
                 public void OnItemClick(int position) {
-                    AddictApplicationInfo selectedApp = searchResultAdapter.mVisibleSearchResult.get(position);
+                    AddictApplicationInfo selectedApp = addProductRecyclerViewAdapter.mVisibleSearchResult.get(position);
                     ProductObject product = new ProductObject();
                     product.setProductName(selectedApp.getProductName());
                     product.setPackageName(selectedApp.getPackageName());
@@ -180,12 +182,16 @@ public class SearchableActivity extends AppCompatActivity {
                     AddictMonitorService.updateQueryNeed = true;
                     Intent intent = new Intent();
                     intent.putExtra("product_name", selectedApp.getProductName());
-                    SearchableActivity.this.setResult(Activity.RESULT_OK, intent);
-                    SearchableActivity.this.finish();
+                    AddProductActivity.this.setResult(Activity.RESULT_OK, intent);
+                    AddProductActivity.this.finish();
                 }
             });
-            searchResultAdapter.flushFilter();
-            recyclerView.setAdapter(searchResultAdapter);
+            addProductRecyclerViewAdapter.flushFilter();
+            recyclerView.setAdapter(addProductRecyclerViewAdapter);
         }
+    }
+
+    private boolean isSystemPackage(ApplicationInfo applicationInfo) {
+        return ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
     }
 }

@@ -1,9 +1,9 @@
-package com.lactozily.addict;
+package com.lactozily.addict.model;
 
 /**
  * Created by lactozily on 5/12/2016 AD.
  */
-class AddictApplicationInfo {
+public class AddictApplicationInfo {
     private final String mProductName;
     private final String mPackageName;
 

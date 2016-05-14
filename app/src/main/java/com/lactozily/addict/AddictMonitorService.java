@@ -52,8 +52,6 @@ public class AddictMonitorService extends IntentService {
 
                     if(updateQueryNeed) {
                         updateQueryNeed = false;
-                        Log.i("Query", "UpdateQuery");
-                        Log.i("Query", query.toString());
                         break;
                     }
 

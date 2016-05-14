@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.lactozily.addict.adapter.ProductListRecyclerviewAdapter;
 import com.lactozily.addict.model.ProductObject;
 
 import java.util.ArrayList;
@@ -70,21 +71,22 @@ public class ProductListFragment extends Fragment {
 
         Collections.sort(productList, new MostUseComparator());
 
+
         ProductListRecyclerviewAdapter productListRecyclerviewAdapter = new ProductListRecyclerviewAdapter(getActivity().getPackageManager(),
                 mTabPosition,
                 new AddictUtility.OnClickListener() {
                     @Override
                     public void OnItemClick(int position) {
-                        Intent intent = new Intent(getActivity().getBaseContext(), ProductDetail.class);
-                        String packageName = query.get(position).getPackageName();
-                        String productName = query.get(position).getProductName();
+                        Intent intent = new Intent(getActivity().getBaseContext(), ProductDetailActivity.class);
+                        String packageName = productList.get(position).getPackageName();
+                        String productName = productList.get(position).getProductName();
                         intent.putExtra("package_name", packageName);
                         intent.putExtra("product_name", productName);
 
                         getActivity().startActivityForResult(intent, AddictUtility.REMOVE_PRODUCT_REQUEST_CODE);
                     }
                 }, productList);
-        recyclerView.swapAdapter(productListRecyclerviewAdapter, true);
+        recyclerView.setAdapter(productListRecyclerviewAdapter);
     }
 
     @Override

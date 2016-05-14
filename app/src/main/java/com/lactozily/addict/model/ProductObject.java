@@ -59,4 +59,8 @@ public class ProductObject extends RealmObject {
     public void setCounterDaily(int counterDaily) {
         this.counterDaily = counterDaily;
     }
+
+    public void setHistories(RealmList<ProductHistory> histories) {
+        this.histories = histories;
+    }
 }

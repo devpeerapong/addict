@@ -1,4 +1,4 @@
-package com.lactozily.addict;
+package com.lactozily.addict.adapter;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.lactozily.addict.AddictUtility;
+import com.lactozily.addict.GetPackageIconTask;
+import com.lactozily.addict.R;
 import com.lactozily.addict.model.ProductObject;
 
 import org.ocpsoft.prettytime.PrettyTime;
@@ -37,17 +40,12 @@ public class ProductListRecyclerviewAdapter extends RecyclerView.Adapter<Product
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.addict_stat_listview, parent, false);
         final ViewHolder vh = new ViewHolder((LinearLayout) v);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.OnItemClick(vh.getLayoutPosition());
-            }
-        });
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final int _position = position;
         ProductObject productObject = mProductList.get(position);
         if (!productObject.isValid()) return;
 
@@ -64,6 +62,13 @@ public class ProductListRecyclerviewAdapter extends RecyclerView.Adapter<Product
             PrettyTime prettyTime = new PrettyTime();
             lastUsed = prettyTime.format(productObject.getHistories().last().getTime());
         }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.OnItemClick(_position);
+            }
+        });
 
         holder.bind(packageName, productName, counter, lastUsed);
 

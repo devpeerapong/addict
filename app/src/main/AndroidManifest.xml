@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchableActivity" >
+        <activity android:name=".AddProductActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -32,7 +32,7 @@
             android:name=".AddictMonitorService"
             android:exported="false" />
 
-        <activity android:name=".ProductDetail" >
+        <activity android:name=".ProductDetailActivity" >
         </activity>
     </application>
 
