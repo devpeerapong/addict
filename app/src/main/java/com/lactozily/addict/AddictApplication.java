@@ -46,33 +46,9 @@ public class AddictApplication extends Application {
             li.setProductName("Line");
             li.setPackageName("jp.naver.line.android");
 
-            ProductObject ig = new ProductObject();
-            ig.setProductName("Instagram");
-            ig.setPackageName("com.instagram.android");
-
-            ProductObject sn = new ProductObject();
-            sn.setProductName("Snapchat");
-            sn.setPackageName("com.snapchat.android");
-
-            ProductObject tw = new ProductObject();
-            tw.setProductName("Twitter");
-            tw.setPackageName("com.twitter.android");
-
-            ProductObject bw = new ProductObject();
-            bw.setProductName("Chrome");
-            bw.setPackageName("com.android.browser");
-
-            ProductObject ch = new ProductObject();
-            bw.setProductName("Browser");
-            bw.setPackageName("com.android.browser");
-
             realm.beginTransaction();
             realm.copyToRealm(fb);
             realm.copyToRealm(li);
-            realm.copyToRealm(ig);
-            realm.copyToRealm(sn);
-            realm.copyToRealm(tw);
-            realm.copyToRealm(bw);
             realm.commitTransaction();
         }
     }

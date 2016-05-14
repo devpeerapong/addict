@@ -8,7 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,18 +28,19 @@ import com.lactozily.addict.model.ProductObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import io.realm.Realm;
 
 public class SearchableActivity extends AppCompatActivity {
-    PackageManager mPackageManager;
-    List<ApplicationInfo> installedApplications;
-    List<AddictApplicationInfo> mApplicationInfo;
+    private PackageManager mPackageManager;
+    private List<ApplicationInfo> installedApplications;
+    private List<AddictApplicationInfo> mApplicationInfo;
 
-    ProgressBar progressBar;
-    RecyclerView recyclerView;
-    SearchResultAdapter searchResultAdapter;
-    Realm realm;
+    private ProgressBar progressBar;
+    private RecyclerView recyclerView;
+    private SearchResultAdapter searchResultAdapter;
+    private Realm realm;
 
 
     @Override
@@ -86,7 +86,7 @@ public class SearchableActivity extends AppCompatActivity {
         }
     }
 
-    void initializeToolBar() {
+    private void initializeToolBar() {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_search);
 
         setSupportActionBar(toolbar);
@@ -99,7 +99,7 @@ public class SearchableActivity extends AppCompatActivity {
         }
     }
 
-    void initializeRecyclerView() {
+    private void initializeRecyclerView() {
         recyclerView = (RecyclerView)findViewById(R.id.search_results);
         assert recyclerView != null;
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -114,7 +114,7 @@ public class SearchableActivity extends AppCompatActivity {
         }));
     }
 
-    void initializeSearchView(Menu menu) {
+    private void initializeSearchView(Menu menu) {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         // Assumes current activity is the searchable activity
@@ -134,7 +134,7 @@ public class SearchableActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText == "") {
+                if (Objects.equals(newText, "")) {
                     ((SearchResultAdapter) recyclerView.getAdapter()).flushFilter();
                     return true;
                 }

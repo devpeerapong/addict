@@ -24,13 +24,13 @@ import io.realm.RealmResults;
  * Created by lactozily on 2/27/2016 AD.
  */
 public class AddictMonitorService extends IntentService {
-    public static final String TAG = AddictMonitorService.class.getSimpleName();
-    public static final String NONE_PKG = "NONE_PKG";
-    public static String CURRENT_APP;
-    public static String PREVIOUS_APP;
+    private static final String TAG = AddictMonitorService.class.getSimpleName();
+    private static final String NONE_PKG = "NONE_PKG";
+    private static String CURRENT_APP;
+    private static String PREVIOUS_APP;
     public static boolean updateQueryNeed = false;
-    Realm realm;
-    RealmResults<ProductObject> query;
+    private Realm realm;
+    private RealmResults<ProductObject> query;
 
 
     public AddictMonitorService() { super("addict-monitor-service"); }
@@ -104,10 +104,8 @@ public class AddictMonitorService extends IntentService {
     }
 
     private boolean hasPackage() {
-        if (query.where().equalTo("packageName", CURRENT_APP).findAll().size() == 0)
-            return false;
+        return query.where().equalTo("packageName", CURRENT_APP).findAll().size() != 0;
 
-        return true;
     }
 
     private String getCurrentPackage(){
@@ -121,7 +119,7 @@ public class AddictMonitorService extends IntentService {
         return usageStats.get(0).getPackageName();
     }
 
-    static class RecentUseComparator implements Comparator<UsageStats> {
+    private static class RecentUseComparator implements Comparator<UsageStats> {
         @Override
         public int compare(UsageStats lhs, UsageStats rhs) {
             return (lhs.getLastTimeUsed() > rhs.getLastTimeUsed()) ? -1 : (lhs.getLastTimeUsed() == rhs.getLastTimeUsed()) ? 0 : 1;
@@ -144,7 +142,6 @@ public class AddictMonitorService extends IntentService {
                 notifyUsage(counter, name, "RIP Real Life, GG EZ", text);
                 break;
             default:
-                return;
         }
     }
 
@@ -155,7 +152,7 @@ public class AddictMonitorService extends IntentService {
                 .setContentTitle(title)
                 .setContentText(text);
 
-        int mNotificationId = 001;
+        int mNotificationId = 1;
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =

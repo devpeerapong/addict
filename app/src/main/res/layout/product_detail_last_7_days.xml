@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp">
         <ImageView
+            android:contentDescription="@string/condition_icon"
             android:id="@+id/condition_ic"
             android:layout_centerVertical="true"
             android:layout_width="36dp"

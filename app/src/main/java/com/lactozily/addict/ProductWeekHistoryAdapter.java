@@ -1,10 +1,5 @@
 package com.lactozily.addict;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,14 +11,15 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by lactozily on 5/14/2016 AD.
  */
 public class ProductWeekHistoryAdapter extends RecyclerView.Adapter<ProductWeekHistoryAdapter.ViewHolder> {
 
-    static List<Calendar> mCalendars;
-    static List<Integer> mCounters;
+    private static List<Calendar> mCalendars;
+    private static List<Integer> mCounters;
 
     public ProductWeekHistoryAdapter(List<Integer> counter, List<Calendar> calendars) {
         mCounters = counter;
@@ -34,13 +30,12 @@ public class ProductWeekHistoryAdapter extends RecyclerView.Adapter<ProductWeekH
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.product_detail_last_7_days, parent, false);
-        final ViewHolder vh = new ViewHolder((LinearLayout) v);
-        return vh;
+        return new ViewHolder((LinearLayout) v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy", Locale.ENGLISH);
         String date = sdf.format(mCalendars.get(position).getTime());
         Integer counter = mCounters.get(position);
         holder.bind(date, counter, position);
@@ -52,9 +47,9 @@ public class ProductWeekHistoryAdapter extends RecyclerView.Adapter<ProductWeekH
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView counter_txt;
-        TextView date_txt;
-        ImageView condition_ic;
+        final TextView counter_txt;
+        final TextView date_txt;
+        final ImageView condition_ic;
 
         public ViewHolder(LinearLayout container) {
             super(container);

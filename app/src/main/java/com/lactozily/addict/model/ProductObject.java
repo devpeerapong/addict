@@ -36,10 +36,6 @@ public class ProductObject extends RealmObject {
         return histories;
     }
 
-    public void setHistories(RealmList<ProductHistory> histories) {
-        this.histories = histories;
-    }
-
     public int getCounterAllTime() {
         return counterAllTime;
     }

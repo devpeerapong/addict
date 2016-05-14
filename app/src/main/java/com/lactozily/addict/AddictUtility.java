@@ -5,15 +5,15 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 
 import java.util.Calendar;
 
 /**
  * Created by lactozily on 2/27/2016 AD.
  */
-public class AddictUtility {
+class AddictUtility {
     public static final int ADD_PRODUCT_REQUEST_CODE = 522;
     public static final int REMOVE_PRODUCT_REQUEST_CODE = 10;
 
@@ -37,11 +37,7 @@ public class AddictUtility {
 
     public static boolean isScreenLocked(Context context) {
         KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        if( myKM.inKeyguardRestrictedInputMode()) {
-            return true;
-        } else {
-            return false;
-        }
+        return myKM.inKeyguardRestrictedInputMode();
     }
 
     public static Calendar getStartTimeOfDate() {
@@ -85,5 +81,13 @@ public class AddictUtility {
         cLastDate.set(Calendar.SECOND, 59);
 
         return cLastDate;
+    }
+
+    public interface AsyncResponse {
+        void processFinish(Drawable output);
+    }
+
+    public interface OnClickListener {
+        void OnItemClick(int position);
     }
 }

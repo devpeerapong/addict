@@ -9,4 +9,7 @@
     <string name="add_product_request_code">Add Product</string>
     <string name="product_detail_menu">Product Detail Menu</string>
     <string name="remove_product_menu">Remove</string>
+    <string name="condition_icon">Condition Icon</string>
+    <string name="last_used_icon">Last used icon</string>
+    <string name="last_7_days_icon">Last 7 days icon</string>
 </resources>

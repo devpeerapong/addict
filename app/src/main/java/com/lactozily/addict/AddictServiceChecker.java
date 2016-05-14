@@ -10,7 +10,7 @@ import com.evernote.android.job.Job;
 /**
  * Created by lactozily on 2/27/2016 AD.
  */
-public class AddictServiceChecker extends Job {
+class AddictServiceChecker extends Job {
     public static final String TAG = "addict-service-checker";
 
     @Override

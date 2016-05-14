@@ -2,9 +2,7 @@ package com.lactozily.addict;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +18,10 @@ import java.util.List;
  */
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
 
-    static PackageManager mPackageManager;
+    private final List<AddictApplicationInfo> mSearchResults;
+    private static PackageManager mPackageManager;
     public List<AddictApplicationInfo> mVisibleSearchResult;
-    List<AddictApplicationInfo> mSearchResults;
-    OnClickListener mListener;
+    private final OnClickListener mListener;
 
     public interface OnClickListener {
         void OnItemClick(int position);
@@ -62,8 +60,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView product_name_txt;
-        ImageView product_ic;
+        final TextView product_name_txt;
+        final ImageView product_ic;
 
         public ViewHolder(LinearLayout container) {
             super(container);
@@ -73,14 +71,14 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
         public void bind(String packageName, String productName) {
             product_name_txt.setText(productName);
-            PackageIconTask mPackageIconTask = (PackageIconTask)new PackageIconTask(new AsyncResponse() {
+            new GetPackageIconTask(new AddictUtility.AsyncResponse() {
                 @Override
                 public void processFinish(Drawable output) {
                     if (output != null) {
                         product_ic.setImageDrawable(output);
                     }
                 }
-            }).execute(packageName);
+            }, mPackageManager).execute(packageName);
         }
     }
 
@@ -97,33 +95,5 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
                 mVisibleSearchResult.add(appInfo);
         }
         notifyDataSetChanged();
-    }
-
-    public interface AsyncResponse {
-        void processFinish(Drawable output);
-    }
-
-    private static class PackageIconTask extends AsyncTask<String, String, Drawable> {
-        public AsyncResponse delegate = null;
-
-        public PackageIconTask(AsyncResponse delegate){
-            this.delegate = delegate;
-        }
-
-        @Override
-        protected Drawable doInBackground(String... params) {
-            Drawable icon = null;
-            try {
-                icon = mPackageManager.getApplicationIcon(params[0]);
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-            return icon;
-        }
-
-        @Override
-        protected void onPostExecute(Drawable icon) {
-            delegate.processFinish(icon);
-        }
     }
 }

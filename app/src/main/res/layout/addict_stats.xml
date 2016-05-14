@@ -2,9 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="48dp"
@@ -12,10 +10,8 @@
         android:id="@+id/date_txt"
         android:layout_marginStart="16dp"
         android:gravity="center"/>
-    <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
-        android:id="@+id/addict_stats_recycle_view"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/product_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:rrvIsRefreshable="false"
-        app:rrvLayoutType="LinearLayout" />
+        android:layout_height="match_parent"/>
 </LinearLayout>
