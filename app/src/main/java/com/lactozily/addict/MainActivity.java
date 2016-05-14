@@ -1,21 +1,15 @@
 package com.lactozily.addict;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,24 +18,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
-import com.lactozily.addict.model.ProductHistory;
 import com.lactozily.addict.model.ProductObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.NoSuchElementException;
 
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -57,6 +46,28 @@ public class MainActivity extends AppCompatActivity {
         realm = Realm.getDefaultInstance();
         query = realm.where(ProductObject.class).findAll();
 
+        initializeToolbar();
+        initializeFragment();
+
+        mJobManager = JobManager.instance();
+
+        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
+            Intent intent = new Intent(this, AddictMonitorService.class);
+            startService(intent);
+        }
+    }
+
+    private void initializeFragment() {
+        AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
+        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
+        assert viewPager != null;
+        viewPager.setAdapter(addictPagerAdapter);
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.tab);
+        assert tabLayout != null;
+        tabLayout.setupWithViewPager(viewPager);
+    }
+
+    private void initializeToolbar() {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -66,34 +77,12 @@ public class MainActivity extends AppCompatActivity {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-
-        AddictPagerAdapter addictPagerAdapter = new AddictPagerAdapter(getSupportFragmentManager());
-        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
-        assert viewPager != null;
-        viewPager.setAdapter(addictPagerAdapter);
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.tab);
-        assert tabLayout != null;
-        tabLayout.setupWithViewPager(viewPager);
-
-        mJobManager = JobManager.instance();
-
-        Log.i(TAG, "Create Activity");
-
-        if (!AddictUtility.isMyServiceRunning(this, AddictMonitorService.class)) {
-            Intent intent = new Intent(this, AddictMonitorService.class);
-            startService(intent);
-            Log.i(TAG, "Service not running");
-        }
-
-        Log.i(TAG, "Service running");
     }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_add).getActionView();
         return true;
     }
 
@@ -101,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add:
                 Intent intent = new Intent(this, SearchableActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, AddictUtility.ADD_PRODUCT_REQUEST_CODE);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
             default:
@@ -118,12 +107,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
         new JobRequest.Builder(AddictServiceChecker.TAG)
                 .setPeriodic(60_000L)
                 .setPersisted(true)
                 .build()
                 .schedule();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == AddictUtility.ADD_PRODUCT_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            Toast.makeText(this, "Add " + data.getStringExtra("product_name") + " Complete", Toast.LENGTH_SHORT).show();
+        }
     }
 
     static class AddictPagerAdapter extends FragmentStatePagerAdapter {

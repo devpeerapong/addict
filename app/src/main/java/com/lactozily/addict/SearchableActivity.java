@@ -1,7 +1,9 @@
 package com.lactozily.addict;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -22,9 +24,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.lactozily.addict.model.ProductObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.realm.Realm;
 
 public class SearchableActivity extends AppCompatActivity {
     PackageManager mPackageManager;
@@ -34,12 +40,14 @@ public class SearchableActivity extends AppCompatActivity {
     ProgressBar progressBar;
     RecyclerView recyclerView;
     SearchResultAdapter searchResultAdapter;
+    Realm realm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_searchable);
-
+        realm = Realm.getDefaultInstance();
         mPackageManager = getPackageManager();
         installedApplications = new ArrayList<>();
         mApplicationInfo = new ArrayList<>();
@@ -49,6 +57,12 @@ public class SearchableActivity extends AppCompatActivity {
         initializeRecyclerView();
 
         new GetAllInstalledApplicationTask().execute();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     @Override
@@ -92,24 +106,15 @@ public class SearchableActivity extends AppCompatActivity {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(new SearchResultAdapter(mApplicationInfo, mPackageManager));
+        recyclerView.setAdapter(new SearchResultAdapter(mApplicationInfo, mPackageManager, new SearchResultAdapter.OnClickListener() {
+            @Override
+            public void OnItemClick(int position) {
+                Log.i("ClickItem", searchResultAdapter.mVisibleSearchResult.get(position).getPackageName());
+            }
+        }));
     }
 
     void initializeSearchView(Menu menu) {
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                ((SearchResultAdapter) recyclerView.getAdapter()).flushFilter();
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                return true;
-            }
-        });
-
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         // Assumes current activity is the searchable activity
@@ -122,7 +127,7 @@ public class SearchableActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.i("searchView", query);
+                SearchableActivity.this.setResult(Activity.RESULT_CANCELED);
                 SearchableActivity.this.finish();
                 return true;
             }
@@ -154,7 +159,28 @@ public class SearchableActivity extends AppCompatActivity {
                 mApplicationInfo.add(new AddictApplicationInfo(appInfo.loadLabel(mPackageManager).toString(), appInfo.packageName));
             }
             progressBar.setVisibility(View.INVISIBLE);
-            searchResultAdapter = new SearchResultAdapter(mApplicationInfo, mPackageManager);
+            searchResultAdapter = new SearchResultAdapter(mApplicationInfo, mPackageManager, new SearchResultAdapter.OnClickListener() {
+                @Override
+                public void OnItemClick(int position) {
+                    AddictApplicationInfo selectedApp = searchResultAdapter.mVisibleSearchResult.get(position);
+//                    ProductObject product = new ProductObject();
+//                    product.setProductName(selectedApp.getProductName());
+//                    product.setPackageName(selectedApp.getPackageName());
+//                    product.setCounterDaily(0);
+//                    product.setCounterMonthly(0);
+//                    product.setCounterAllTime(0);
+//
+//                    realm.beginTransaction();
+//                    realm.copyToRealm(product);
+//                    realm.commitTransaction();
+                    Log.i("OnItemClick", "WHAT");
+                    Intent intent = new Intent();
+                    intent.putExtra("product_name", selectedApp.getProductName());
+                    SearchableActivity.this.setResult(Activity.RESULT_OK, intent);
+                    SearchableActivity.this.finish();
+                }
+            });
+            searchResultAdapter.flushFilter();
             recyclerView.setAdapter(searchResultAdapter);
         }
     }

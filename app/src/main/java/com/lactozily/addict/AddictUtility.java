@@ -13,6 +13,8 @@ import java.util.Calendar;
  * Created by lactozily on 2/27/2016 AD.
  */
 public class AddictUtility {
+    public static int ADD_PRODUCT_REQUEST_CODE = 0;
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static boolean usageAccessGranted(Context context) {
         AppOpsManager appOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);

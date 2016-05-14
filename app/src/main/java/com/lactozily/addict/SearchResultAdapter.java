@@ -4,6 +4,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,40 +20,41 @@ import java.util.List;
  */
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
 
-    PackageManager mPackageManager;
+    static PackageManager mPackageManager;
+    public List<AddictApplicationInfo> mVisibleSearchResult;
     List<AddictApplicationInfo> mSearchResults;
-    List<AddictApplicationInfo> mVisibleSearchResult;
+    OnClickListener mListener;
 
-    public SearchResultAdapter(List<AddictApplicationInfo> SearchResults, PackageManager packageManager) {
+    public interface OnClickListener {
+        void OnItemClick(int position);
+    }
+
+    public SearchResultAdapter(List<AddictApplicationInfo> SearchResults, PackageManager packageManager, OnClickListener listener) {
         mSearchResults = SearchResults;
         mPackageManager = packageManager;
         mVisibleSearchResult = new ArrayList<>();
+        mListener = listener;
     }
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.searchable_recycleview, parent, false);
-        ViewHolder vh = new ViewHolder((LinearLayout) v);
+        final ViewHolder vh = new ViewHolder((LinearLayout) v);
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.OnItemClick(vh.getLayoutPosition());
+            }
+        });
         return vh;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final ViewHolder mHolder = holder;
         String packageName = mVisibleSearchResult.get(position).getPackageName();
         String productName = mVisibleSearchResult.get(position).getProductName();
-        holder.product_name_txt.setText(productName);
+        holder.bind(packageName, productName);
 
-
-
-        PackageIconTask mPackageIconTask = (PackageIconTask)new PackageIconTask(new AsyncResponse() {
-            @Override
-            public void processFinish(Drawable output) {
-                if (output != null) {
-                    mHolder.product_ic.setImageDrawable(output);
-                }
-            }
-        }).execute(packageName);
     }
 
     @Override
@@ -60,14 +62,26 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         return mVisibleSearchResult.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView product_name_txt;
         ImageView product_ic;
 
         public ViewHolder(LinearLayout container) {
             super(container);
-            this.product_name_txt = (TextView) container.findViewById(R.id.product_name_txt);
-            this.product_ic = (ImageView) container.findViewById(R.id.ic_product);
+            product_name_txt = (TextView) container.findViewById(R.id.product_name_txt);
+            product_ic = (ImageView) container.findViewById(R.id.ic_product);
+        }
+
+        public void bind(String packageName, String productName) {
+            product_name_txt.setText(productName);
+            PackageIconTask mPackageIconTask = (PackageIconTask)new PackageIconTask(new AsyncResponse() {
+                @Override
+                public void processFinish(Drawable output) {
+                    if (output != null) {
+                        product_ic.setImageDrawable(output);
+                    }
+                }
+            }).execute(packageName);
         }
     }
 
@@ -80,7 +94,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     public void setFilter(String queryText) {
         mVisibleSearchResult = new ArrayList<>();
         for (AddictApplicationInfo appInfo: mSearchResults) {
-            if (appInfo.getProductName().toLowerCase().startsWith(queryText))
+            if (appInfo.getProductName().toLowerCase().startsWith(queryText.toLowerCase()))
                 mVisibleSearchResult.add(appInfo);
         }
         notifyDataSetChanged();
@@ -90,7 +104,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         void processFinish(Drawable output);
     }
 
-    private class PackageIconTask extends AsyncTask<String, String, Drawable> {
+    private static class PackageIconTask extends AsyncTask<String, String, Drawable> {
         public AsyncResponse delegate = null;
 
         public PackageIconTask(AsyncResponse delegate){
